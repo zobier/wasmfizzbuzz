@@ -1,0 +1,22 @@
+{
+  "name": "wasmfizzbuzz",
+  "version": "0.0.1",
+  "description": "webassembly fizzbuzz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zobier/wasmfizzbuzz.git"
+  },
+  "main": "index.ts",
+  "license": "MIT",
+  "scripts": {
+    "test": "ts-node index"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0"
+  },
+  "dependencies": {
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.3",
+    "wabt": "^1.0.29"
+  }
+}
