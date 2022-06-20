@@ -9,7 +9,8 @@
   "main": "index.ts",
   "license": "MIT",
   "scripts": {
-    "test": "ts-node index"
+    "start": "ts-node index",
+    "test": "ts-node test"
   },
   "devDependencies": {
     "@types/node": "^18.0.0"

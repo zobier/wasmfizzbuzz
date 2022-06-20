@@ -13,6 +13,12 @@ inspired by https://codegolf.stackexchange.com/questions/215216/high-throughput-
 yarn
 ```
 
+## running
+
+```sh
+yarn start
+```
+
 ## testing
 
 ```sh
