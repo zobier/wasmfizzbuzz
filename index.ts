@@ -29,7 +29,7 @@ wabt().then(async ({ parseWat }) => {
         (br_if 1
           (i32.ge_u
             (local.get $start)
-            (local.get $end))))
+            (local.get $end)))
         (local.set $tmp
           (i32.load8_u
             (local.get $start)))
@@ -48,7 +48,7 @@ wabt().then(async ({ parseWat }) => {
           (i32.sub
             (local.get $end)
             (i32.const 1)))
-        (br 0)))
+        (br 0))))
   (func $uitoa
     (param $num i64)
     (param $chrptr i32)
