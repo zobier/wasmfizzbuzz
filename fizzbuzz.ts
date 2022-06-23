@@ -1,7 +1,5 @@
 import wabt from "wabt";
 
-const PAGES_OF_MEMORY = 1;
-
 export default wabt().then(async ({ parseWat }) => {
   const module = await WebAssembly.compile(
     parseWat(
@@ -10,9 +8,33 @@ export default wabt().then(async ({ parseWat }) => {
 (module
   (import "env" "memory"
     (memory 1))
-  (import "env" "dump"
-    (func $dump
-      (param i32)))
+  (func $mem_copy
+    (param $from i32)
+    (param $to i32)
+    (param $len i32)
+    (local $i i32)
+    (local.set $i
+      (i32.const 0))
+    (loop $copy
+      (i32.store
+        (i32.add
+          (local.get $to)
+          (i32.mul
+            (local.get $i)
+            (i32.const 4)))
+        (i32.load
+          (i32.add
+            (local.get $from)
+            (i32.mul
+              (local.get $i)
+              (i32.const 4)))))
+      (br_if $copy
+        (i32.lt_u
+          (local.tee $i
+            (i32.add
+              (local.get $i)
+              (i32.const 1)))
+          (local.get $len)))))
   (func $reverse
     (export "reverse")
     (param $start i32)
@@ -127,8 +149,18 @@ export default wabt().then(async ({ parseWat }) => {
     (local.get $chrptr))
   (func
     (export "fizzBuzz")
-    (local $i i64)
+    (param $i i64)
+    (param $copy_from i32)
+    (param $copy_len i32)
+    (param $generate_bytes i32)
+    (result i32 i64)
     (local $chrptr i32)
+    (call $mem_copy
+      (local.get $copy_from)
+      (i32.const 0)
+      (local.get $copy_len))
+    (local.set $chrptr
+      (local.get $copy_len))
     (loop
       (local.set $chrptr
         (call $print_num
@@ -222,18 +254,12 @@ export default wabt().then(async ({ parseWat }) => {
         (i64.add
           (local.get $i)
           (i64.const 15)))
-      (if
-        (i32.gt_u
-          (i32.add
-            (local.get $chrptr)
-            (i32.const 207))
-          (i32.const ${65536 * PAGES_OF_MEMORY}))
-        (then
-          (call $dump
-            (local.get $chrptr))
-          (local.set $chrptr
-            (i32.const 0))))
-      (br 0))))`,
+      (br_if 0
+        (i32.lt_u
+          (local.get $chrptr)
+          (local.get $generate_bytes))))
+    (local.get $chrptr)
+    (local.get $i)))`,
       {
         multi_value: true,
       }
@@ -242,13 +268,11 @@ export default wabt().then(async ({ parseWat }) => {
     }).buffer
   );
   const memory = new WebAssembly.Memory({
-    initial: PAGES_OF_MEMORY,
+    initial: 1,
   });
   const { exports } = await WebAssembly.instantiate(module, {
     env: {
       memory,
-      dump: (length: number) =>
-        process.stdout.write(new Uint8Array(memory.buffer, 0, length)),
     },
   });
 
@@ -258,7 +282,12 @@ export default wabt().then(async ({ parseWat }) => {
   };
 }) as Promise<{
   exports: {
-    fizzBuzz: () => void;
+    fizzBuzz: (
+      start: bigint,
+      copyFrom: number,
+      copyLen: number,
+      generateBytes: number
+    ) => [number, bigint];
     reverse: (start: number, len: number) => void;
     ui64toa: (num: BigInt, charptr: number) => number;
   };
