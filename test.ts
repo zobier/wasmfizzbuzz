@@ -3,10 +3,10 @@ import test from "node:test";
 import module from "./fizzbuzz";
 
 const readString = (buffer: ArrayBuffer, start: number, length: number) =>
-  new TextDecoder().decode(new Uint8Array(buffer, start, length));
+  new TextDecoder().decode(new Uint8Array(new Uint32Array(buffer, start, length)));
 
 const writeString = (buffer: ArrayBuffer, start: number, string: string) =>
-  new Uint8Array(buffer).set(new TextEncoder().encode(string), start);
+  new Uint32Array(buffer).set(new TextEncoder().encode(string), start);
 
 const reverseString = (string: string) => string.split("").reverse().join("");
 

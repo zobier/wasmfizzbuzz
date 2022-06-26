@@ -44,9 +44,11 @@ export default wabt().then(async ({ parseWat }) => {
     (local.set $end
       (i32.add
         (local.get $start)
-        (i32.sub
-          (local.get $len)
-          (i32.const 1))))
+        (i32.mul
+          (i32.sub
+            (local.get $len)
+            (i32.const 1))
+          (i32.const 4))))
     (block
       (loop
         (br_if 1
@@ -54,23 +56,23 @@ export default wabt().then(async ({ parseWat }) => {
             (local.get $start)
             (local.get $end)))
         (local.set $tmp
-          (i32.load8_u
+          (i32.load
             (local.get $start)))
-        (i32.store8
+        (i32.store
           (local.get $start)
-          (i32.load8_u
+          (i32.load
             (local.get $end)))
-        (i32.store8
+        (i32.store
           (local.get $end)
           (local.get $tmp))
         (local.set $start
           (i32.add
             (local.get $start)
-            (i32.const 1)))
+            (i32.const 4)))
         (local.set $end
           (i32.sub
             (local.get $end)
-            (i32.const 1)))
+            (i32.const 4)))
         (br 0))))
   (func $ui64toa
     (export "ui64toa")
@@ -85,10 +87,12 @@ export default wabt().then(async ({ parseWat }) => {
           (i64.rem_u
             (local.get $num)
             (i64.const 10))))
-      (i32.store8
+      (i32.store
         (i32.add
           (local.get $chrptr)
-          (local.get $i))
+          (i32.mul
+            (local.get $i)
+            (i32.const 4)))
         (i32.add
           (local.get $rem)
           (i32.const 48)))
@@ -115,52 +119,150 @@ export default wabt().then(async ({ parseWat }) => {
     (local.set $chrptr
       (i32.add
         (local.get $chrptr)
-        (call $ui64toa
-          (local.get $num)
-          (local.get $chrptr))))
-    (i32.store8
+        (i32.mul
+          (call $ui64toa
+            (local.get $num)
+            (local.get $chrptr))
+          (i32.const 4))))
+    (i32.store
       (local.get $chrptr)
       (i32.const 10))
     (i32.add
       (local.get $chrptr)
-      (i32.const 1)))
-  (func $print_word
-    (param $word i32)
-    (param $newline i32)
+      (i32.const 4)))
+  (func $print_fizz
     (param $chrptr i32)
     (result i32)
     (i32.store
       (local.get $chrptr)
-      (local.get $word))
-    (local.set $chrptr
+      (i32.const 70))
+    (i32.store
       (i32.add
         (local.get $chrptr)
-        (i32.const 4)))
-    (if
-      (local.get $newline)
-      (then
-        (i32.store8
-          (local.get $chrptr)
-          (i32.const 10))
-        (local.set $chrptr
-          (i32.add
-            (local.get $chrptr)
-            (i32.const 1)))))
-    (local.get $chrptr))
+        (i32.const 4))
+      (i32.const 105))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 8))
+      (i32.const 122))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 12))
+      (i32.const 122))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 16))
+      (i32.const 10))
+    (i32.add
+      (local.get $chrptr)
+      (i32.const 20)))
+  (func $print_buzz
+    (param $chrptr i32)
+    (result i32)
+    (i32.store
+      (local.get $chrptr)
+      (i32.const 66))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 4))
+      (i32.const 117))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 8))
+      (i32.const 122))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 12))
+      (i32.const 122))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 16))
+      (i32.const 10))
+    (i32.add
+      (local.get $chrptr)
+      (i32.const 20)))
+  (func $print_fizzbuzz
+    (param $chrptr i32)
+    (result i32)
+    (i32.store
+      (local.get $chrptr)
+      (i32.const 70))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 4))
+      (i32.const 105))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 8))
+      (i32.const 122))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 12))
+      (i32.const 122))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 16))
+      (i32.const 66))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 20))
+      (i32.const 117))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 24))
+      (i32.const 122))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 28))
+      (i32.const 122))
+    (i32.store
+      (i32.add
+        (local.get $chrptr)
+        (i32.const 32))
+      (i32.const 10))
+    (i32.add
+      (local.get $chrptr)
+      (i32.const 36)))
   (func
     (export "fizzBuzz")
     (param $i i64)
     (param $copy_from i32)
     (param $copy_len i32)
-    (param $generate_bytes i32)
+    (param $generate_words i32)
     (result i32 i64)
     (local $chrptr i32)
-    (call $mem_copy
-      (local.get $copy_from)
-      (i32.const 0)
-      (local.get $copy_len))
+    (local $end i32)
+    (if
+      (i32.ge_u
+        (local.get $copy_len)
+        (i32.const 0))
+      (then
+        (call $mem_copy
+          (local.get $copy_from)
+          (i32.const 0)
+          (local.get $copy_len))))
     (local.set $chrptr
-      (local.get $copy_len))
+      (i32.mul
+        (local.get $copy_len)
+        (i32.const 4)))
+    (local.set $end
+      (i32.mul
+        (local.get $generate_words)
+        (i32.const 4)))
     (loop
       (local.set $chrptr
         (call $print_num
@@ -175,9 +277,7 @@ export default wabt().then(async ({ parseWat }) => {
             (i64.const 2))
           (local.get $chrptr)))
       (local.set $chrptr
-        (call $print_word
-          (i32.const 2054842694) ;; Fizz
-          (i32.const 1)
+        (call $print_fizz
           (local.get $chrptr)))
       (local.set $chrptr
         (call $print_num
@@ -186,14 +286,10 @@ export default wabt().then(async ({ parseWat }) => {
             (i64.const 4))
           (local.get $chrptr)))
       (local.set $chrptr
-        (call $print_word
-          (i32.const 2054845762) ;; Buzz
-          (i32.const 1)
+        (call $print_buzz
           (local.get $chrptr)))
       (local.set $chrptr
-        (call $print_word
-          (i32.const 2054842694) ;; Fizz
-          (i32.const 1)
+        (call $print_fizz
           (local.get $chrptr)))
       (local.set $chrptr
         (call $print_num
@@ -208,14 +304,10 @@ export default wabt().then(async ({ parseWat }) => {
             (i64.const 8))
           (local.get $chrptr)))
       (local.set $chrptr
-        (call $print_word
-          (i32.const 2054842694) ;; Fizz
-          (i32.const 1)
+        (call $print_fizz
           (local.get $chrptr)))
       (local.set $chrptr
-        (call $print_word
-          (i32.const 2054845762) ;; Buzz
-          (i32.const 1)
+        (call $print_buzz
           (local.get $chrptr)))
       (local.set $chrptr
         (call $print_num
@@ -224,9 +316,7 @@ export default wabt().then(async ({ parseWat }) => {
             (i64.const 11))
           (local.get $chrptr)))
       (local.set $chrptr
-        (call $print_word
-          (i32.const 2054842694) ;; Fizz
-          (i32.const 1)
+        (call $print_fizz
           (local.get $chrptr)))
       (local.set $chrptr
         (call $print_num
@@ -241,14 +331,7 @@ export default wabt().then(async ({ parseWat }) => {
             (i64.const 14))
           (local.get $chrptr)))
       (local.set $chrptr
-        (call $print_word
-          (i32.const 2054842694) ;; Fizz
-          (i32.const 0)
-          (local.get $chrptr)))
-      (local.set $chrptr
-        (call $print_word
-          (i32.const 2054845762) ;; Buzz
-          (i32.const 1)
+        (call $print_fizzbuzz
           (local.get $chrptr)))
       (local.set $i
         (i64.add
@@ -257,7 +340,7 @@ export default wabt().then(async ({ parseWat }) => {
       (br_if 0
         (i32.lt_u
           (local.get $chrptr)
-          (local.get $generate_bytes))))
+          (local.get $end))))
     (local.get $chrptr)
     (local.get $i)))`,
       {
@@ -268,7 +351,7 @@ export default wabt().then(async ({ parseWat }) => {
     }).buffer
   );
   const memory = new WebAssembly.Memory({
-    initial: 1,
+    initial: 2,
   });
   const { exports } = await WebAssembly.instantiate(module, {
     env: {
